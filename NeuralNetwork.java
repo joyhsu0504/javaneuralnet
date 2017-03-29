@@ -5,17 +5,18 @@
  * Rectified linear unit non-linearity on each neuron
  * a*x + b*y + c*z + d
  */
+import java.util.*;
 public class NeuralNetwork {
 	public static void main(String[] args) {
 		// Each data point act as an input
 		// Three features per data point
 		// Expected output of -1 or 1
-		Feature f1 = new Feature(1.2, 0.7, 0.2);
-		Feature f2 = new Feature(-0.3, -0.5, 0.8);
-		Feature f3 = new Feature(3.0, 0.1, -0.3);
-		Feature f4 = new Feature(-0.1, -1.0, -0.4);
-		Feature f5 = new Feature(-1.0, 1.1, 0.9);
-		Feature f6 = new Feature(2.1, -3, 0.4);
+		Feature f1 = new Feature(255, 0, 0);
+		Feature f2 = new Feature(243, 88, 88);
+		Feature f3 = new Feature(183, 25, 25);
+		Feature f4 = new Feature(25, 52, 183);
+		Feature f5 = new Feature(10, 49, 247);
+		Feature f6 = new Feature(0, 0, 255);
 		Feature[] data= {f1, f2, f3, f4, f5, f6};
 		double[] expected_output = {1, -1, 1, -1, -1, 1};
 		// Size acts as amount of neurons + 1
@@ -46,7 +47,8 @@ public class NeuralNetwork {
 			double output = expected_output[i];
 			// Activate neurons using a*x + b*y + c*z + d
 			double neuron1 = Math.max(0, forward[weight1]*x + forward[weight2]*y + forward[weight3]*z + forward[weight4]);
-			double neuron2 = Math.max(0, forward[weight1 + 1]*x + forward[weight2 + 1]*y + forward[weight3 + 1]*z + forward[weight4 + 1]);			double neuron3 = Math.max(0, forward[weight1 + 2]*x + forward[weight2 + 2]*y + forward[weight3 + 2]*z + forward[weight4 + 2]);
+			double neuron2 = Math.max(0, forward[weight1 + 1]*x + forward[weight2 + 1]*y + forward[weight3 + 1]*z + forward[weight4 + 1]);
+			double neuron3 = Math.max(0, forward[weight1 + 2]*x + forward[weight2 + 2]*y + forward[weight3 + 2]*z + forward[weight4 + 2]);
 			// Find final score using three neurons a*n1 + b*n2 + c*n3 + d;
 			double score = forward[weight1 + 3]*neuron1 + forward[weight2 + 3]*neuron2 + forward[weight3 + 3]*neuron3 + forward[forward.length-1]; 
 			// Print accuracy every 50 iterations
@@ -112,6 +114,19 @@ public class NeuralNetwork {
 				forward[j] += step_size * back[j];
 			}
 		}
+		Scanner sc = new Scanner(System.in);
+		System.out.print("R: ");
+		double red = (double)sc.nextInt();
+		System.out.print("G: ");
+		double green = (double)sc.nextInt();
+		System.out.print("B: ");
+		double blue = (double)sc.nextInt();
+		double temp = calc(forward, red, green, blue);
+		if(temp > 0) {
+			System.out.println("Red detected");
+		} else {
+			System.out.println("Blue detected");
+		}
 	}
 	// Evaluate accuracy of training at given iteration
 	public static double eval(Feature[] data, double[] expected_output, double[] forward) {
@@ -121,20 +136,27 @@ public class NeuralNetwork {
 			double y = data[i].second;
 			double z = data[i].third;
 			double true_output = expected_output[i];
-			int size = 4;
-			int weight1 = size*0;
-			int weight2 = size*1;
-			int weight3 = size*2;
-			int weight4 = size*3;
-			double neuron1 = Math.max(0, forward[weight1]*x + forward[weight2]*y + forward[weight3]*z + forward[weight4]);
-			double neuron2 = Math.max(0, forward[weight1 + 1]*x + forward[weight2 + 1]*y + forward[weight3 + 1]*z + forward[weight4 + 1]); 			double neuron3 = Math.max(0, forward[weight1 + 2]*x + forward[weight2 + 2]*y + forward[weight3 + 2]*z + forward[weight4 + 2]);
-			double predicted_output = (forward[weight1 + 3]*neuron1 + forward[weight2 + 3]*neuron2 + forward[weight3 + 3]*neuron3 + forward[forward.length-1]) > 0 ? 1 : -1;
+			double predicted_output = (calc(forward, x, y, z)) > 0 ? 1 : -1;
 			// Compare predicted output to expected output
 			if(predicted_output == true_output) {
 				num_correct++;
 		    }
 		}
 		return num_correct/data.length;
+	}
+	// Calculate predicted output
+	public static double calc(double[] forward, double x, double y, double z) {
+		int size = 4;
+		int weight1 = size*0;
+		int weight2 = size*1;
+		int weight3 = size*2;
+		int weight4 = size*3;
+		// Calculate neurons with a*x + b*y + c*z + d
+		double neuron1 = Math.max(0, forward[weight1]*x + forward[weight2]*y + forward[weight3]*z + forward[weight4]);
+		double neuron2 = Math.max(0, forward[weight1 + 1]*x + forward[weight2 + 1]*y + forward[weight3 + 1]*z + forward[weight4 + 1]);
+		double neuron3 = Math.max(0, forward[weight1 + 2]*x + forward[weight2 + 2]*y + forward[weight3 + 2]*z + forward[weight4 + 2]);
+		// Find final score using three neurons a*n1 + b*n2 + c*n3 + d;
+		return forward[weight1 + 3]*neuron1 + forward[weight2 + 3]*neuron2 + forward[weight3 + 3]*neuron3 + forward[forward.length-1]; 
 	}
 }
 
