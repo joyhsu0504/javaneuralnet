@@ -50,7 +50,7 @@ public class NeuralNetwork {
 			double neuron2 = Math.max(0, forward[weight1 + 1]*x + forward[weight2 + 1]*y + forward[weight3 + 1]*z + forward[weight4 + 1]);
 			double neuron3 = Math.max(0, forward[weight1 + 2]*x + forward[weight2 + 2]*y + forward[weight3 + 2]*z + forward[weight4 + 2]);
 			// Find final score using three neurons a*n1 + b*n2 + c*n3 + d;
-			double score = forward[weight1 + 3]*neuron1 + forward[weight2 + 3]*neuron2 + forward[weight3 + 3]*neuron3 + forward[forward.length-1]; 
+			double score = forward[weight1 + 3]*neuron1 + forward[weight2 + 3]*neuron2 + forward[weight3 + 3]*neuron3 + forward[forward.length-1];//?? 
 			// Print accuracy every 50 iterations
 			if(iter % 50 == 0) {
 				System.out.println("Iteration: " + iter + "\t Training accuracy: " + eval(data, expected_output, forward));
@@ -73,7 +73,7 @@ public class NeuralNetwork {
 			back[weight1 + 3] = neuron1 * dscore;
 			back[weight2 + 3] = neuron2 * dscore;
 			back[weight3 + 3] = neuron3 * dscore;
-			back[back.length-1] = 1.0 * dscore;
+			back[forward.length-1] = 1.0 * dscore; //??
 			double dneuron1 = forward[weight1 + 3] * dscore;
 			double dneuron2 = forward[weight2 + 3] * dscore;
 			double dneuron3 = forward[weight3 + 3] * dscore;
@@ -96,17 +96,18 @@ public class NeuralNetwork {
 			back[weight4 + 1] = 1.0 * dneuron2;
 
 			// Back prop to parameters of neuron3
-			back[weight1 + 3] = x * dneuron3;
-			back[weight2 + 3] = y * dneuron3;
-			back[weight3 + 3] = z * dneuron3;
-			back[weight4 + 3] = 1.0 * dneuron3;
+			back[weight1 + 2] = x * dneuron3;
+			back[weight2 + 2] = y * dneuron3;
+			back[weight3 + 2] = z * dneuron3;
+			back[weight4 + 2] = 1.0 * dneuron3;
 			
 			// Add pulls from the regularization
 			// Tug all multiplicative parameters downward proportional to value
 			for(int j = 0; j < size*3; j++) {
-				back[j] = back[j] - forward[j];
+				if((j+1)%4 != 0) {
+					back[j] += -forward[j];
+				}
 			}
-			back[weight4 + 3] = back[weight4 + 3] - forward[weight4 + 3];
 			
 			// Update parameters
 		    double step_size = 0.01;
